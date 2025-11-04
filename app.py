@@ -196,10 +196,8 @@ def mk():
     query = request.args.get('q')
     tk = request.args.get('tk')
     global tags
-    tags[query] = tk
     global index
     global data
-    index[query] = len(data) 
     url = f"https://www.screener.in/company/{query}/consolidated"
     d = {}
     d["name"] = query
@@ -227,7 +225,7 @@ def mk():
     div2 = soup.find('span', {'class': 'font-size-12 up margin-left-4'})
     dev = str(div1 if div1 is not None else div2)[90:].split("</")[0].strip()[:-1]
     d["deviation"] = float(dev)
-    url = f"https://www.screener.in/api/company/{tags[query]}/peers"
+    url = f"https://www.screener.in/api/company/{tk}/peers"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     rows = soup.find_all("tr", attrs={"data-row-company-id": True})
@@ -244,6 +242,10 @@ def mk():
             d["qtr_sales_var"] = qtrsv
 
     data.append(d)
+    
+    tags[query] = tk
+    index[query] = len(data) 
+    
     return "done"
 
 @app.route("/rm", methods=["GET","POST"])
@@ -321,3 +323,4 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
