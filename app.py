@@ -5,6 +5,12 @@ import atexit
 from time import sleep
 from collections import defaultdict
 import os
+import sqlite3
+from datetime import datetime
+
+def connect_db():
+    conn = sqlite3.connect('db.db')
+    return conn
 
 import smtplib
 from email.message import EmailMessage
@@ -133,14 +139,14 @@ def update():
 
         else:
             data[index[i]]["tag"] = 0
-
+        '''
         if i in holdings.keys():
             if holdings[i][-1] * (1+k) < price:
                 alert(i, "Buy", 0)
             elif holdings[i][-1] * (1-k) > price:
                 alert(i, "Sell", 1)
 
-
+        '''
     return "done"
 
 @app.route("/background", methods=["GET","POST"])
@@ -280,27 +286,72 @@ def ck():
 @app.route("/buy", methods=["GET","POST"])
 def buy():
     query = request.args.get('q')
+    num = request.args.get('n')
     global data
     global index
     global holdings
     if query not in index.keys():
         return "Stock not in monitoring list"
+    
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute(
+        '''
+        INSERT INTO Buy (name, price, amt) VALUES (?,?,?)
+        ''', (query, data[index[query]]['price'], int(num))
+    )
+    id = c.lastrowid
+    conn.commit()
+    conn.close()
     if holdings[query] == []:
-        holdings[query] = [data[index[query]]['price']]
+        holdings[query] = [[data[index[query]]['price'], id]]
     else:
-        holdings[query].append(data[index[query]]['price'])
+        holdings[query].append([data[index[query]]['price'], id])
     
     return redirect("/portfolio")
 
 @app.route('/sell', methods=["GET","POST"])
 def sell():
     query = request.args.get('q')
+    id = request.args.get('n')
     global holdings
-    if holdings[query] != []:
-        holdings[query].pop(-1)
-        return redirect("/portfolio")
-    else:
-        return "no stock to sell"
+    if int(id) not in [j[1] for j in holdings[query]]:
+        return "No such holding exists"
+    holdings[query] = [j for j in holdings[query] if j[1] != int(id)]
+
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute(
+        "SELECT date, price, amt FROM Buy WHERE lid = ?", (int(id),)
+    )
+    row = c.fetchone()
+    buy_price = row[1]
+    sell_price = data[index[query]]['price']
+    profit = (sell_price - buy_price) * row[2]
+    c.execute(
+        '''
+        INSERT INTO Sell (lid, profit) VALUES (?,?)
+        ''', (int(id), profit)
+    )
+    conn.commit()
+    c.execute(
+        "SELECT Sell.date, Buy.date FROM Sell JOIN Buy ON Sell.lid = Buy.lid WHERE Sell.lid = ?", (int(id),)
+    )
+    row = c.fetchone()
+    buy_date_str = row[1]
+    sell_date_str = row[0]
+
+    buy_date = datetime.strptime(buy_date_str, "%Y-%m-%d %H:%M:%S")
+    sell_date = datetime.strptime(sell_date_str, "%Y-%m-%d %H:%M:%S")
+    print(buy_date, sell_date)
+    duration = (sell_date - buy_date).days
+    print(duration)
+    c.execute(
+        "UPDATE Sell SET duration = ? WHERE lid = ?", (duration, int(id))
+    )
+    conn.commit()
+    conn.close()
+    return redirect("/portfolio")
 
 @app.route('/portfolio', methods=["GET","POST"])
 def port():
@@ -327,6 +378,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
