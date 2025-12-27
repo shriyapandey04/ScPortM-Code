@@ -2,4 +2,3 @@ beautifulsoup4
 requests
 apscheduler
 flask
-sqlite3
