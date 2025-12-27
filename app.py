@@ -355,15 +355,51 @@ def sell():
 
 @app.route('/portfolio', methods=["GET","POST"])
 def port():
+    return render_template("port.html")
+
+@app.route('/holding', methods=["GET","POST"])
+def holding():
     global holdings
-    return holdings
+    ids = []
+    for i in holdings.keys():
+        for j in holdings[i]:
+            ids.append(j[1])
+    placeholders = ', '.join('?' for _ in ids)
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute(
+        f'''
+        SELECT * FROM Buy
+        WHERE lid IN ({placeholders})
+        ''', ids
+    )
+    rows = c.fetchall()
+    print(rows)
+    conn.close()
+    return jsonify(rows)
 
+@app.route('/history', methods=["GET","POST"])
+def hist():
+    return render_template("history.html")
 
-
+@app.route('/hist_data', methods=["GET","POST"])
+def history():
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute(
+        '''
+        SELECT Buy.name, Buy.date, Buy.price, Buy.amt, Sell.date, Sell.profit, Sell.duration
+        FROM Buy
+        LEFT JOIN Sell ON Buy.lid = Sell.lid
+        '''
+    )
+    rows = c.fetchall()
+    conn.close()
+    return jsonify(rows)
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=update, trigger="interval", minutes=5)
+scheduler.add_job(func=update, trigger="interval", minutes=1)
 scheduler.add_job(
     func=background,
     trigger="cron",
@@ -378,6 +414,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
