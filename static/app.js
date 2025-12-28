@@ -48,7 +48,10 @@ const tab = {
 
       const qty = prompt(`Enter quantity to buy for ${stock.name}:`);
       const price = prompt(`Enter price (-1 for current price):`);
-      // Cancel or empty
+      var date = 0;
+      if (price != "-1"){
+        date = prompt(`Enter date:`);
+      }
       if (qty === null || qty.trim() === "") {
         alert("Quantity is required.");
         return;
@@ -62,7 +65,7 @@ const tab = {
         return;
       }
 
-      fetch(`/buy?q=${encodeURIComponent(stock.name)}&n=${n}&p={price}`);
+      fetch(`/buy?q=${encodeURIComponent(stock.name)}&n=${n}&p=${price}&d=${date}`);
 
       this.boughtMap[stock.name] = true;
 
@@ -268,7 +271,13 @@ const tab2 = {
       );
       if (!ok) return;
 
-      fetch(`/sell?q=${encodeURIComponent(row.name)}&n=${row.lid}`)
+      var date = 0;
+      const qty = prompt(`Enter selling price (-1 for curr price):`);
+      if (qty != "-1"){
+        date = prompt(`Enter date:`);
+      }
+
+      fetch(`/sell?q=${encodeURIComponent(row.name)}&n=${row.lid}&p=${qty}&d=${date}`)
         .then(() => {
           // refresh portfolio after sell
           this.loadPortfolio();
