@@ -287,6 +287,8 @@ def ck():
 def buy():
     query = request.args.get('q')
     num = request.args.get('n')
+    price = request.args.get('p')
+    date = request.args.get('d')
     global data
     global index
     global holdings
@@ -314,6 +316,8 @@ def buy():
 def sell():
     query = request.args.get('q')
     id = request.args.get('n')
+    price = request.args.get('p')
+    date = request.args.get('d')
     global holdings
     if int(id) not in [j[1] for j in holdings[query]]:
         return "No such holding exists"
@@ -326,7 +330,7 @@ def sell():
     )
     row = c.fetchone()
     buy_price = row[1]
-    sell_price = data[index[query]]['price']
+    sell_price = data[index[query]]['price'] if price=="-1" else float(price)
     profit = (sell_price - buy_price) * row[2]
     c.execute(
         '''
@@ -414,6 +418,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
