@@ -6,7 +6,7 @@ from time import sleep
 from collections import defaultdict
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def connect_db():
     conn = sqlite3.connect('db.db')
@@ -289,6 +289,7 @@ def buy():
     num = request.args.get('n')
     price = request.args.get('p')
     date = request.args.get('d')
+    day = datetime.now() - timedelta(days=int(date)) if date!="0" else datetime.now()
     global data
     global index
     global holdings
@@ -299,8 +300,8 @@ def buy():
     c = conn.cursor()
     c.execute(
         '''
-        INSERT INTO Buy (name, price, amt) VALUES (?,?,?)
-        ''', (query, data[index[query]]['price'] if price=="-1" else float(price), int(num))
+        INSERT INTO Buy (name, price, amt, date) VALUES (?,?,?,?)
+        ''', (query, data[index[query]]['price'] if price=="-1" else float(price), int(num), day.strftime("%Y-%m-%d %H:%M:%S"))
     )
     id = c.lastrowid
     conn.commit()
@@ -318,6 +319,7 @@ def sell():
     id = request.args.get('n')
     price = request.args.get('p')
     date = request.args.get('d')
+    day = datetime.now() - timedelta(days=int(date)) if date!="0" else datetime.now()
     global holdings
     if int(id) not in [j[1] for j in holdings[query]]:
         return "No such holding exists"
@@ -334,8 +336,8 @@ def sell():
     profit = (sell_price - buy_price) * row[2]
     c.execute(
         '''
-        INSERT INTO Sell (lid, profit) VALUES (?,?)
-        ''', (int(id), profit)
+        INSERT INTO Sell (lid, profit, sell_price, date) VALUES (?,?,?,?)
+        ''', (int(id), profit, sell_price, day.strftime("%Y-%m-%d %H:%M:%S"))
     )
     conn.commit()
     c.execute(
@@ -392,7 +394,7 @@ def history():
     c = conn.cursor()
     c.execute(
         '''
-        SELECT Buy.name, Buy.date, Buy.price, Buy.amt, Sell.date, Sell.profit, Sell.duration
+        SELECT Buy.name, Buy.date, Buy.price, Buy.amt, Sell.date, Sell.profit, Sell.duration, Sell.sell_price
         FROM Buy
         LEFT JOIN Sell ON Buy.lid = Sell.lid
         '''
@@ -418,6 +420,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
