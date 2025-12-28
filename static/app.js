@@ -422,7 +422,8 @@ const tab3 = {
           sell_date: r[4],
           profit: r[5],
           duration: r[6],
-          sell_price: r[7]
+          sell_price: r[7],
+          sid: r[8]
         }));
         this.loading = false;
       })
@@ -435,6 +436,23 @@ const tab3 = {
   methods: {
     totalBuyRow(row) {
       return row.buy_price * row.amt;
+    },
+
+    hideRow(row) {
+      const ok = confirm(
+        `Hide this record for ${row.name}?\nThis cannot be viewed again.`
+      );
+      if (!ok) return;
+
+      fetch(`/hide?q=${row.sid}`)
+        .then(() => {
+          // refresh history after hide
+          alert("Record hidden");
+        })
+        .catch(err => {
+          alert("Failed to hide record");
+          console.error(err);
+        });
     }
   },
 
@@ -494,7 +512,7 @@ const tab3 = {
           :key="idx"
           class="px-4 py-3 border rounded bg-white text-sm"
         >
-          <div class="grid grid-cols-8 gap-6">
+          <div class="grid grid-cols-9 gap-6">
 
             <div>
               <div class="text-xs text-gray-500">Name</div>
@@ -548,6 +566,16 @@ const tab3 = {
               >
                 {{ row.profit === null ? "—" : "₹" + row.profit }}
               </div>
+            </div>
+
+            <div class="flex items-end">
+              <button
+                @click="hideRow(row)"
+                class="px-3 py-1.5 text-xs font-semibold rounded
+                      bg-gray-600 text-white hover:bg-gray-700"
+              >
+                Hide
+              </button>
             </div>
 
           </div>
