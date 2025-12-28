@@ -85,13 +85,13 @@ def init():
 
 init()
 
-def alert(name, action):
+def alert(name, action, id):
     msg = EmailMessage()
     msg['Subject'] = f'Stock Action Alert - {action} {name}'
     msg['From'] = 'nk1804417@gmail.com'
     msg['To'] = 'kishor2376@gmail.com'
     msg.set_content(
-        f"Stock data for {name} has triggered an {action} alert."
+        f"Stock data for {name} has triggered an {action} alert for lot ID {id}."
     )
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login('nk1804417@gmail.com', 'ootd rwtk hxyh ygod')
@@ -147,6 +147,12 @@ def update():
                 alert(i, "Sell", 1)
 
         '''
+        if i in holdings.keys():
+            for j in holdings[i]:
+                if j[0] * (1+k) < price:
+                    alert(i, "Buy", j[1])
+                elif j[0] * (1-k) > price:
+                    alert(i, "Sell", j[1])
     return "done"
 
 @app.route("/background", methods=["GET","POST"])
@@ -394,14 +400,28 @@ def history():
     c = conn.cursor()
     c.execute(
         '''
-        SELECT Buy.name, Buy.date, Buy.price, Buy.amt, Sell.date, Sell.profit, Sell.duration, Sell.sell_price
+        SELECT Buy.name, Buy.date, Buy.price, Buy.amt, Sell.date, Sell.profit, Sell.duration, Sell.sell_price, Sell.sid
         FROM Buy
         LEFT JOIN Sell ON Buy.lid = Sell.lid
+        WHERE Sell.hidden IS NULL OR Sell.hidden = 0
         '''
     )
     rows = c.fetchall()
     conn.close()
     return jsonify(rows)
+
+@app.route('/hide', methods=["GET","POST"])
+def hide():
+    query = request.args.get('q')
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute(
+        '''
+        UPDATE Sell SET hidden = 1 WHERE sid = ?''', (int(query),)
+    )
+    conn.commit()
+    conn.close()
+    return redirect("/history")
 
 
 scheduler = BackgroundScheduler()
@@ -420,6 +440,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
