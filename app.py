@@ -44,11 +44,11 @@ def init():
         nums = div.find_all('span', {'class': 'number'})
         cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
         d["market_cap"] = cap
-        price = int("".join(str(nums[1]).split("</")[0][21:].split(",")))
+        price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
         d["price"] = price
-        high = int("".join(str(nums[2]).split("</")[0][21:].split(",")))
+        high = float("".join(str(nums[2]).split("</")[0][21:].split(",")))
         d["high"] = high
-        low = int("".join(str(nums[3]).split("</")[0][21:].split(",")))
+        low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
         d["low"] = low
         pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
         d["pe"] = pe
@@ -467,6 +467,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
