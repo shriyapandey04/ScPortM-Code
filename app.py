@@ -53,7 +53,7 @@ def init():
                 break
         
             except requests.exceptions.RequestException as e:
-                print(f"Request failed: {e}. Retrying in 5s...")
+                logger.info(f"Request failed: {e}. Retrying in 5s...")
                 time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
@@ -92,7 +92,7 @@ def init():
                 break
         
             except requests.exceptions.RequestException as e:
-                print(f"Request failed: {e}. Retrying in 5s...")
+                logger.info(f"Request failed: {e}. Retrying in 5s...")
                 time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
@@ -235,7 +235,7 @@ def background():
                 break
         
             except requests.exceptions.RequestException as e:
-                print(f"Request failed: {e}. Retrying in 5s...")
+                logger.info(f"Request failed: {e}. Retrying in 5s...")
                 time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
@@ -268,7 +268,7 @@ def background():
                 break
         
             except requests.exceptions.RequestException as e:
-                print(f"Request failed: {e}. Retrying in 5s...")
+                logger.info(f"Request failed: {e}. Retrying in 5s...")
                 time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
@@ -312,7 +312,7 @@ def mk():
             break
     
         except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}. Retrying in 5s...")
+            logger.info(f"Request failed: {e}. Retrying in 5s...")
             time.sleep(5)
     soup = BeautifulSoup(response.text, 'html.parser')
     div = soup.find('ul', {'id': 'top-ratios'})
@@ -349,7 +349,7 @@ def mk():
             break
     
         except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}. Retrying in 5s...")
+            logger.info(f"Request failed: {e}. Retrying in 5s...")
             time.sleep(5)
     soup = BeautifulSoup(response.text, 'html.parser')
     rows = soup.find_all("tr", attrs={"data-row-company-id": True})
@@ -553,6 +553,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
