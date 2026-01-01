@@ -38,13 +38,13 @@ def init():
     global index
     global data
     for i in tags.keys():
-        sleep(10)
+        sleep(30)
         d = {}
         url = f"https://www.screener.in/company/{i}/consolidated"
+        logger.info(i)
         d["name"] = i
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        logger.info(soup)
         div = soup.find('ul', {'id': 'top-ratios'})
         print(i)
         nums = div.find_all('span', {'class': 'number'})
@@ -470,6 +470,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
