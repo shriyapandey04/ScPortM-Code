@@ -24,8 +24,8 @@ from email.message import EmailMessage
 data = []
 index = {}
 tags = {
-    'RELIANCE': 6598251,
-    'BEL': 6595017
+    'BEL': 6595017,
+    'RELIANCE': 6598251
 }
 k = 0.1
 holdings = defaultdict(list)
@@ -553,6 +553,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
