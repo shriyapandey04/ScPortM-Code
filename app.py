@@ -38,7 +38,7 @@ def init():
     global index
     global data
     for i in tags.keys():
-        sleep(30)
+        sleep(10)
         d = {}
         url = f"https://www.screener.in/company/{i}/consolidated"
         logger.info(i)
@@ -470,6 +470,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
