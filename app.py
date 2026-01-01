@@ -81,8 +81,6 @@ def init():
 
         data.append(d)
         index[i] = len(data)-1
-        with open("index.txt", "w") as f:
-            f.write(f"{index}")
     print("Data uploaded")
 
 init()
@@ -106,6 +104,21 @@ app = Flask(__name__, template_folder='.', static_folder='static')
 @app.route("/", methods=["GET","POST"])
 def home():
     return render_template("index.html")
+
+@app.route('/index', methods=["GET","POST"])
+def get_index():
+    global index
+    return index
+
+@app.route('/hold', methods=["GET","POST"])
+def get_holding():
+    global holdings
+    return holdings
+
+@app.route('/tags', methods=["GET","POST"])
+def get_tags():
+    global tags
+    return tags
 
 
 
@@ -158,8 +171,6 @@ def update():
                     alert(i, "Buy", j[1])
                 elif j[0] * (1-k) > price:
                     alert(i, "Sell", j[1])
-        with open("holdings.txt", "w") as f:
-            f.write(f"{holdings}")
     return "done"
 
 @app.route("/background", methods=["GET","POST"])
@@ -176,8 +187,8 @@ def background():
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
         cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
-        high = int("".join(str(nums[2]).split("</")[0][21:].split(",")))
-        low = int("".join(str(nums[3]).split("</")[0][21:].split(",")))
+        high = float("".join(str(nums[2]).split("</")[0][21:].split(",")))
+        low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
         pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
         book = float("".join(str(nums[5]).split("</")[0][21:].split(","))) if str(nums[5]).split("</")[0][21:]!="" else 0
         roce = float("".join(str(nums[7]).split("</")[0][21:].split(",")))
@@ -230,11 +241,11 @@ def mk():
     nums = div.find_all('span', {'class': 'number'})
     cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
     d["market_cap"] = cap
-    price = int("".join(str(nums[1]).split("</")[0][21:].split(",")))
+    price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
     d["price"] = price
-    high = int("".join(str(nums[2]).split("</")[0][21:].split(",")))
+    high = float("".join(str(nums[2]).split("</")[0][21:].split(",")))
     d["high"] = high
-    low = int("".join(str(nums[3]).split("</")[0][21:].split(",")))
+    low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
     d["low"] = low
     pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
     d["pe"] = pe
@@ -268,11 +279,6 @@ def mk():
     
     tags[query] = tk
     index[query] = len(data) - 1
-    with open("tags.txt", "w") as f:
-            f.write(tags)
-
-    with open("index.txt", "w") as f:
-        f.write(f"{index}")
     return "done"
 
 @app.route("/rm", methods=["GET","POST"])
@@ -289,8 +295,6 @@ def rm():
 
     data.pop(n)
     tags.pop(query)
-    with open("tags.txt", "w") as f:
-            f.write(f"{tags}")
     return "done"
     
 @app.route("/ck", methods=["GET", "POST"])
@@ -300,8 +304,6 @@ def ck():
     if query == "NC":
         return str(k)
     k = float(query)
-    with open("k.txt", "w") as f:
-            f.write(k)
     return f"done : {k}"
 
 @app.route("/buy", methods=["GET","POST"])
@@ -334,8 +336,6 @@ def buy():
     for i in data:
         if i['name'] == query:
             i['num'] = i.get('num', 0) + 1
-    with open("holdings.txt", "w") as f:
-            f.write(f"{holdings}")
     return redirect("/portfolio")
 
 @app.route('/sell', methods=["GET","POST"])
@@ -385,8 +385,6 @@ def sell():
     for i in data:
         if i['name'] == query:
             i['num'] = i.get('num', 0) - 1
-    with open("holdings.txt", "w") as f:
-            f.write(f"{holdings}")
     return redirect("/portfolio")
 
 @app.route('/portfolio', methods=["GET","POST"])
@@ -412,8 +410,6 @@ def holding():
     rows = c.fetchall()
     print(rows)
     conn.close()
-    with open("holdings.txt", "w") as f:
-            f.write(f"{holdings}")
     return jsonify(rows)
 
 @app.route('/history', methods=["GET","POST"])
@@ -467,6 +463,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
