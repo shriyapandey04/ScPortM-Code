@@ -107,6 +107,22 @@ app = Flask(__name__, template_folder='.', static_folder='static')
 def home():
     return render_template("index.html")
 
+@app.route("/index", methods=["GET","POST"])
+def ind():
+    global index
+    return index
+
+@app.route("/holdings", methods=["GET","POST"])
+def hold():
+    global holdings
+    return holdings
+
+@app.route("/tag", methods=["GET", "POST"])
+def tag():
+    global tags
+    return tags
+
+
 @app.route("/data", methods=["GET","POST"])
 def all_data():
     global data
@@ -464,6 +480,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
