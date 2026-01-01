@@ -43,7 +43,19 @@ def init():
         url = f"https://www.screener.in/company/{i}/consolidated"
         logger.info(i)
         d["name"] = i
-        response = requests.get(url)
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}. Retrying in 5s...")
+                time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         print(i)
@@ -69,8 +81,20 @@ def init():
         dev = str(div1 if div1 is not None else div2)[90:].split("</")[0].strip()[:-1]
         d["deviation"] = float(dev)
 
+        
         url = f"https://www.screener.in/api/company/{tags[i]}/peers"
-        response = requests.get(url)
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                break
+        
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}. Retrying in 5s...")
+                time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
         for j in rows:
@@ -145,7 +169,19 @@ def update():
     for i in tags.keys():
         sleep(10)
         url = f"https://www.screener.in/company/{i}/consolidated"
-        response = requests.get(url)
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}. Retrying in 5s...")
+                time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -189,7 +225,19 @@ def background():
     for i in tags.keys():
         sleep(10)
         url = f"https://www.screener.in/company/{i}/consolidated"
-        response = requests.get(url)
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}. Retrying in 5s...")
+                time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -210,7 +258,19 @@ def background():
         data[index[i]]["roe"] = roe
 
         url = f"https://www.screener.in/api/company/{tags[i]}/peers"
-        response = requests.get(url)
+        while True:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()  # catches 4xx / 5xx
+        
+                soup = BeautifulSoup(response.text, 'html.parser')
+        
+                # success → break loop
+                break
+        
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}. Retrying in 5s...")
+                time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         rows = soup.find_all("tr", attrs={"data-row-company-id": True})
         for j in rows:
@@ -242,7 +302,19 @@ def mk():
     url = f"https://www.screener.in/company/{query}/consolidated"
     d = {}
     d["name"] = query
-    response = requests.get(url)
+    while True:
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()  # catches 4xx / 5xx
+    
+            soup = BeautifulSoup(response.text, 'html.parser')
+    
+            # success → break loop
+            break
+    
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}. Retrying in 5s...")
+            time.sleep(5)
     soup = BeautifulSoup(response.text, 'html.parser')
     div = soup.find('ul', {'id': 'top-ratios'})
     nums = div.find_all('span', {'class': 'number'})
@@ -267,7 +339,19 @@ def mk():
     dev = str(div1 if div1 is not None else div2)[90:].split("</")[0].strip()[:-1]
     d["deviation"] = float(dev)
     url = f"https://www.screener.in/api/company/{tk}/peers"
-    response = requests.get(url)
+    while True:
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()  # catches 4xx / 5xx
+    
+            soup = BeautifulSoup(response.text, 'html.parser')
+    
+            # success → break loop
+            break
+    
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}. Retrying in 5s...")
+            time.sleep(5)
     soup = BeautifulSoup(response.text, 'html.parser')
     rows = soup.find_all("tr", attrs={"data-row-company-id": True})
     for j in rows:
@@ -470,6 +554,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
