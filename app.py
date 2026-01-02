@@ -59,7 +59,7 @@ def init():
         div = soup.find('ul', {'id': 'top-ratios'})
         print(i)
         nums = div.find_all('span', {'class': 'number'})
-        cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
+        cap = float("".join(str(nums[0]).split("</")[0][21:].split(",")))
         d["market_cap"] = cap
         price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
         d["price"] = price
@@ -240,7 +240,7 @@ def background():
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
-        cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
+        cap = float("".join(str(nums[0]).split("</")[0][21:].split(",")))
         high = float("".join(str(nums[2]).split("</")[0][21:].split(",")))
         low = float("".join(str(nums[3]).split("</")[0][21:].split(",")))
         pe = float("".join(str(nums[4]).split("</")[0][21:].split(",")))
@@ -317,7 +317,7 @@ def mk():
     soup = BeautifulSoup(response.text, 'html.parser')
     div = soup.find('ul', {'id': 'top-ratios'})
     nums = div.find_all('span', {'class': 'number'})
-    cap = int("".join(str(nums[0]).split("</")[0][21:].split(",")))
+    cap = float("".join(str(nums[0]).split("</")[0][21:].split(",")))
     d["market_cap"] = cap
     price = float("".join(str(nums[1]).split("</")[0][21:].split(",")))
     d["price"] = price
@@ -553,6 +553,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
