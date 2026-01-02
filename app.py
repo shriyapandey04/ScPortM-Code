@@ -166,11 +166,11 @@ def update():
     global holdings
     global k
     for i in tags.keys():
-        sleep(15)
+        sleep(5)
         url = f"https://www.screener.in/company/{i}/consolidated"
         while True:
             try:
-                response = requests.get(url, timeout=10)
+                response = requests.get(url, timeout=5)
                 response.raise_for_status()  # catches 4xx / 5xx
         
                 soup = BeautifulSoup(response.text, 'html.parser')
@@ -180,7 +180,7 @@ def update():
         
             except requests.exceptions.RequestException as e:
                 print(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(15)
+                time.sleep(5)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -236,7 +236,7 @@ def background():
         
             except requests.exceptions.RequestException as e:
                 logger.info(f"Request failed: {e}. Retrying in 5s...")
-                time.sleep(5)
+                time.sleep(10)
         soup = BeautifulSoup(response.text, 'html.parser')
         div = soup.find('ul', {'id': 'top-ratios'})
         nums = div.find_all('span', {'class': 'number'})
@@ -553,6 +553,7 @@ atexit.register(lambda: scheduler.shutdown())
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
 
